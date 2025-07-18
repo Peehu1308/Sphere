@@ -3,7 +3,7 @@
 
 Sphere is a Gen-Z inspired mobile app that brings together the aesthetics of Pinterest, the vibe of Spotify, and the depth of Medium—all in one space. Whether you're in the mood to create, explore, or simply unwind, Sphere is your personalized digital sanctuary.
 
-🎵 Features
+# 🎵 Features
 🎧 Vibe Boards: Combine music, images, and moods to express how you feel.
 
 📝 Mini Blogs: Read and write lifestyle snippets, reflections, or creative entries.
@@ -12,7 +12,7 @@ Sphere is a Gen-Z inspired mobile app that brings together the aesthetics of Pin
 
 🌙 Immersive Experience: Listen to lo-fi tracks while reading and browsing.
 
-🚀 Tech Stack
+# 🚀 Tech Stack
 Flutter – for a beautiful, responsive cross-platform UI.
 
 Dart – powering smooth navigation and logic.
