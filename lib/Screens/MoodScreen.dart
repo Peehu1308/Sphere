@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 // import 'package:sphere/components/MoodScreen_box.dart';
 import 'package:sphere/components/mood_board.dart';
-import 'package:sphere/components/navbar.dart'; 
+import 'package:sphere/components/navbar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class MoodScreen extends StatefulWidget {
   const MoodScreen({super.key});
 
@@ -10,12 +12,12 @@ class MoodScreen extends StatefulWidget {
 }
 
 class _MoodScreenState extends State<MoodScreen> {
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MoodScreen Screen'),
-      ),
+      appBar: AppBar(title: const Text('MoodScreen Screen')),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
@@ -24,12 +26,12 @@ class _MoodScreenState extends State<MoodScreen> {
                 'Welcome to the MoodScreen Screen',
                 style: TextStyle(fontSize: 24),
               ),
-              SafeArea(child: MoodGrid())
+              SafeArea(child: MoodGrid()),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: Navbar(currentIndex: 1, onTap: (index){}),
+      bottomNavigationBar: Navbar(currentIndex: 1, onTap: (index) {}),
     );
   }
 }
