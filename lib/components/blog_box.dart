@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BlogBox extends StatelessWidget {
   final String text;
@@ -15,6 +16,7 @@ class BlogBox extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: color,
+        // color: Colors.grey
       ),
       child: Text(
         text,
@@ -29,25 +31,15 @@ class BlogBox extends StatelessWidget {
   }
 }
 
-class BlogGrid extends StatelessWidget {
-  BlogGrid({super.key});
+class BlogGrid extends StatefulWidget {
+  const BlogGrid({super.key});
 
-  final List<String> blogTexts = [
-    "Short blog",
-    "This is a bit longer blog to see how height works",
-    "Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Tiny post",
-    "One more example of a blog card with random height depending on how much text it has.Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Tiny post",
-    "One more example of a blog card with random height depending on how much text it has.",
-    "Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Tiny post",
-    "One more example of a blog card with random height depending on how much text it has.",
-    "Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Tiny post",
-    "One more example of a blog card with random height depending on how much text it has.",
-  ];
+  @override
+  State<StatefulWidget> createState() => _BlogGridState();
+}
+
+class _BlogGridState extends State<BlogGrid> {
+  List<String> blogTexts = [];
 
   final List<Color> blogColors = [
     const Color(0xFF183059),
@@ -56,6 +48,32 @@ class BlogGrid extends StatelessWidget {
     const Color(0xFF2F394D),
     const Color(0xFF0A2463),
   ];
+
+  @override
+  void initState() {
+    fetchBlog();
+  }
+
+  Future<void> fetchBlog() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('Blog')
+          .select('Blog,Type');
+
+      // print("Fetched the blog: $response");
+
+      if (response is List) {
+        setState(() {
+          blogTexts = response
+              .where((row) => row['Blog'] != null)
+              .map<String>((row) => row['Blog'] as String)
+              .toList();
+        });
+      }
+    } catch (e) {
+      print("Error fetching blog: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
