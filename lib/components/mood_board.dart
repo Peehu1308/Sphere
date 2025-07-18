@@ -1,54 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MoodBoardBox extends StatelessWidget {
-  final String text;
+  final String moodimage;
   final Color color;
 
-  const MoodBoardBox({super.key, required this.text, required this.color});
+  const MoodBoardBox({
+    super.key,
+    required this.color,
+    required this.moodimage,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.45,
-      margin: const EdgeInsets.all(3.0),
-      padding: const EdgeInsets.symmetric(
-        vertical: 3.0,
-        horizontal: 12.0,
-      ), // Inner padding
+      margin: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: color,
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          height: 1.4, // Line height for better spacing
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Image.network(
+          moodimage,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.broken_image),
         ),
       ),
     );
   }
 }
 
-class MoodGrid extends StatelessWidget {
-  MoodGrid({super.key});
+class MoodGrid extends StatefulWidget {
+  const MoodGrid({super.key});
 
-  final List<String> blogTexts = [
-    "Short blog",
-    "This is a bit longer blog to see how height works",
-    "Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!,Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Tiny post",
-    "One more example of a blog card with random height depending on how much text it has.",
+  @override
+  State<MoodGrid> createState() => _MoodGridState();
+}
 
-    "Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "Tiny post,Another blog with more content. Flutter makes it super easy to build responsive UIs. Just check this out!",
-    "One more example of a blog card with random height depending on how much text it has.",
-  ];
+class _MoodGridState extends State<MoodGrid> {
+  List<String> moodImages = [];
 
-  final List<Color> MoodColors = [
+  final List<Color> moodColors = [
     const Color(0xFF93032E),
     const Color(0xFFFE4A49),
     const Color(0xFFAF5B5B),
@@ -57,21 +52,49 @@ class MoodGrid extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    fetchMoods();
+  }
+
+  Future<void> fetchMoods() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('MoodBoard')
+          .select('Image');
+
+      print("Fetched response: $response");
+
+      if (response is List) {
+        setState(() {
+          moodImages = response
+              .where((row) => row['Image'] != null && row['Image'] != "")
+              .map<String>((row) => row['Image'] as String)
+              .toList();
+        });
+      }
+    } catch (e) {
+      print("Error fetching mood images: $e");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MasonryGridView.count(
-      crossAxisCount: 2,
-      mainAxisSpacing: 3,
-      crossAxisSpacing: 2,
-      padding: const EdgeInsets.all(8),
-      itemCount: blogTexts.length,
-      
-      shrinkWrap: true,
-      physics:
-          const NeverScrollableScrollPhysics(), // Use if nested inside ScrollView
-      itemBuilder: (context, index) {
-        final color = MoodColors[index % MoodColors.length];
-        return MoodBoardBox(text: blogTexts[index], color: color);
-      },
-    );
+    return moodImages.isEmpty
+        ? const Center(child: CircularProgressIndicator())
+        : MasonryGridView.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 4,
+            crossAxisSpacing: 4,
+            itemCount: moodImages.length,
+            padding: const EdgeInsets.all(8),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final color = moodColors[index % moodColors.length];
+              final img = moodImages[index];
+              return MoodBoardBox(moodimage: img, color: color);
+            },
+          );
   }
 }
