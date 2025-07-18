@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sphere/Screens/BlogScreen.dart';
 import 'package:sphere/Screens/MoodScreen.dart';
 import 'package:sphere/Screens/MusicScreen.dart';
 import 'package:sphere/Screens/SplashScreen.dart';
 import 'package:sphere/components/navbar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+
+Future<void>main()async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName:".env");
+  await Supabase.initialize(
+    anonKey:dotenv.env['API_Key']!, 
+    url: dotenv.env['Project_URL']!);
+  
   runApp(const MyApp());
 }
 
@@ -20,10 +29,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         scaffoldBackgroundColor: Color(0xFFF6F4F3)
       ),
-      // home: const MoodScreen(),
+      home: const MoodScreen(),
       // home: const BlogScreen(),
       // home: const MainScreen(),
-      home:SplashScreen()
+      // home:SplashScreen()
     );
   }
 }
@@ -35,7 +44,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int currrentIndex = 0;
+  int currentIndex = 0;
   late List<Widget> screens;
 
   @override
@@ -51,12 +60,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: screens[currrentIndex],
+      body: screens[currentIndex],
       bottomNavigationBar: Navbar(
-        currentIndex: currrentIndex,
+        currentIndex: currentIndex,
         onTap: (index) {
           setState(() {
-            currrentIndex = index;
+            currentIndex = index;
           });
         },
       ),
