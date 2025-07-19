@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sphere/Screens/BlogScreen.dart';
+import 'package:sphere/Screens/Canvas.dart';
 import 'package:sphere/Screens/MoodScreen.dart';
 import 'package:sphere/Screens/MusicScreen.dart';
 import 'package:sphere/Screens/SplashScreen.dart';
@@ -18,11 +19,12 @@ Future<void> main() async {
   final clientSecret = dotenv.env['SPOTIFY_CLIENT_SECRET']!;
   final redirectUri = dotenv.env['SPOTIFY_REDIRECT_URI']!;
 
-  runApp(const MyApp());
+  runApp(const MyApp(token: '',));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String token;
+  const MyApp({super.key,required this.token});
 
   // This widget is the root of your application.
   @override
@@ -30,16 +32,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(scaffoldBackgroundColor: Color(0xFFF6F4F3)),
-      // home: const MoodScreen(),
+      // home: const MoodScreen(token:widget.token),
       // home: const BlogScreen(),
       // home: const MainScreen(),
-      home:SplashScreen()
+      // home: SplashScreen(token: '',),
+      home:DrawingScreen()
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final String token;
+  const MainScreen({super.key,required this.token});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -47,12 +51,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
+  
   late List<Widget> screens;
 
   @override
   void initState() {
     super.initState();
-    screens = [const MusicScreen(), const MoodScreen(), const BlogScreen()];
+    screens = [MusicScreen(token:widget.token), MoodScreen(token:widget.token), BlogScreen(token:widget.token)];
   }
 
   @override
