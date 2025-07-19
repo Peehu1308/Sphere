@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sphere/Screens/MoodScreen.dart';
 import 'package:sphere/components/spotify.dart';
 import 'package:sphere/main.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final String token;
+  const SplashScreen({super.key, required this.token});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -14,11 +16,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
+        MaterialPageRoute(
+          builder: (context) => MoodScreen(token: widget.token),
+        ),
       );
     });
   }
@@ -44,13 +47,27 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(color: Colors.white),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 20),
             ElevatedButton(
-  onPressed: () {
-    authenticateWithSpotify();
-  },
-  child: const Text('Login with Spotify'),
-)
+              onPressed: () async {
+                final token = await authenticateWithSpotify();
 
+                if (token != null) {
+                  // ✅ Navigate to MainScreen AFTER token is ready
+                  // Navigator.pushReplacement(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => MainScreen(token: token),
+                  //   ),
+                  // );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Spotify login failed")),
+                  );
+                }
+              },
+              child: const Text('Login with Spotify'),
+            ),
           ],
         ),
       ),
