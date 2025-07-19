@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sphere/components/spotify.dart';
 import 'package:sphere/main.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -43,6 +44,13 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(color: Colors.white),
               textAlign: TextAlign.center,
             ),
+            ElevatedButton(
+  onPressed: () {
+    authenticateWithSpotify();
+  },
+  child: const Text('Login with Spotify'),
+)
+
           ],
         ),
       ),
