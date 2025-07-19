@@ -30,7 +30,7 @@ class MusicScreen extends StatelessWidget {
           ),
         ),
       ),
-      // bottomNavigationBar: Navbar(currentIndex: 0, onTap: (index) {}),
+      bottomNavigationBar: Navbar(currentIndex: 0, onTap: (index) {}),
     );
   }
 }
