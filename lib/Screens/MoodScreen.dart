@@ -5,15 +5,14 @@ import 'package:sphere/components/navbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MoodScreen extends StatefulWidget {
-  const MoodScreen({super.key});
+  final String token;
+  const MoodScreen({super.key,required this.token});
 
   @override
   State<MoodScreen> createState() => _MoodScreenState();
 }
 
 class _MoodScreenState extends State<MoodScreen> {
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +30,7 @@ class _MoodScreenState extends State<MoodScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Navbar(currentIndex: 1, onTap: (index) {}),
+      bottomNavigationBar: Navbar(currentIndex: 1, onTap: (index) {}, token:widget.token,),
     );
   }
 }
