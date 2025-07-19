@@ -7,14 +7,17 @@ import 'package:sphere/Screens/SplashScreen.dart';
 import 'package:sphere/components/navbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
-Future<void>main()async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName:".env");
+  await dotenv.load(fileName: ".env");
   await Supabase.initialize(
-    anonKey:dotenv.env['API_Key']!, 
-    url: dotenv.env['Project_URL']!);
-  
+    anonKey: dotenv.env['API_Key']!,
+    url: dotenv.env['Project_URL']!,
+  );
+  final clientId = dotenv.env['SPOTIFY_CLIENT_ID']!;
+  final clientSecret = dotenv.env['SPOTIFY_CLIENT_SECRET']!;
+  final redirectUri = dotenv.env['SPOTIFY_REDIRECT_URI']!;
+
   runApp(const MyApp());
 }
 
@@ -26,16 +29,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Color(0xFFF6F4F3)
-      ),
-      home: const MoodScreen(),
+      theme: ThemeData(scaffoldBackgroundColor: Color(0xFFF6F4F3)),
+      // home: const MoodScreen(),
       // home: const BlogScreen(),
       // home: const MainScreen(),
-      // home:SplashScreen()
+      home:SplashScreen()
     );
   }
 }
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -50,13 +52,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    screens = [
-      const MusicScreen(),
-      const MoodScreen(),
-      const BlogScreen(),
-    ];
+    screens = [const MusicScreen(), const MoodScreen(), const BlogScreen()];
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
