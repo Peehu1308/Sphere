@@ -3,7 +3,8 @@ import 'package:sphere/components/music_box.dart';
 import 'package:sphere/components/navbar.dart';
 
 class MusicScreen extends StatelessWidget {
-  const MusicScreen({super.key});
+  final String token;
+  const MusicScreen({super.key,required this.token});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,11 @@ class MusicScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: Navbar(currentIndex: 0, onTap: (index) {}),
+      bottomNavigationBar: Navbar(
+        currentIndex: 0,
+        onTap: (index) {},
+        token: token,
+      ),
     );
   }
 }
