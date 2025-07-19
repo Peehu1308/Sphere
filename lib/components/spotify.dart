@@ -1,5 +1,5 @@
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -16,29 +16,35 @@ Future<String?> authenticateWithSpotify() async {
   });
 
   try {
-    final result = await FlutterWebAuth.authenticate(
-      url: authUrl.toString(),
-      callbackUrlScheme: redirectUri.split(':').first, // 'myapp'
-    );
+    print("🔗 Opening Spotify auth: $authUrl");
+    final result = await FlutterWebAuth2.authenticate(
+  url: authUrl.toString(),
+  callbackUrlScheme: 'myapp',
+);
+
+
+    print("✅ Callback result: $result");
 
     final code = Uri.parse(result).queryParameters['code'];
+
+    if (code == null) throw Exception("Missing code in callback");
 
     final response = await http.post(
       Uri.parse('https://accounts.spotify.com/api/token'),
       headers: {
-        'Authorization': 'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
+        'Authorization':
+            'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
         'grant_type': 'authorization_code',
-        'code': code!,
+        'code': code,
         'redirect_uri': redirectUri,
       },
     );
 
     final json = jsonDecode(response.body);
     final accessToken = json['access_token'];
-
     print("✅ Access Token: $accessToken");
     return accessToken;
   } catch (e) {
