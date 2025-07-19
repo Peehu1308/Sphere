@@ -61,14 +61,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: screens[currentIndex],
-      bottomNavigationBar: Navbar(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-      ),
+      // bottomNavigationBar: Navbar(
+      //   currentIndex: currentIndex,
+      //   onTap: (index) {
+      //     setState(() {
+      //       currentIndex = index;
+      //     });
+      //   },
+      // ),
     );
   }
 }
