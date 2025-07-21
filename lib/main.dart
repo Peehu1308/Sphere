@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       // home: const BlogScreen(),
       // home: const MainScreen(),
       // home: SplashScreen(token: '',),
-      home:DrawingScreen()
+      home:MyDrawingApp()
     );
   }
 }
