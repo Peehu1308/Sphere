@@ -19,8 +19,21 @@ enum DrawMode { rectangle, circle, free }
 class PositionedImage {
   ui.Image image;
   Offset position;
+  double scale;
 
-  PositionedImage({required this.image, required this.position});
+  PositionedImage({
+    required this.image,
+    required this.position,
+    this.scale = 1.0,
+  });
+
+  PositionedImage copyWith({Offset? position, double? scale}) {
+    return PositionedImage(
+      image: image,
+      position: position ?? this.position,
+      scale: scale ?? this.scale,
+    );
+  }
 }
 
 class DrawingHomePage extends StatefulWidget {
@@ -30,8 +43,9 @@ class DrawingHomePage extends StatefulWidget {
 
 class _DrawingHomePageState extends State<DrawingHomePage> {
   List<PositionedImage> images = [];
-  Offset? selectedImageOffset;
   int? selectedImageIndex;
+  Offset? selectedImageOffset;
+  double initialScale = 1.0;
 
   List<DrawnShape> shapes = [];
   List<DrawnLine> lines = [];
@@ -49,8 +63,14 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
     final data = await rootBundle.load(assetPath);
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final frame = await codec.getNextFrame();
+    final image = frame.image;
+
     setState(() {
-      images.add(PositionedImage(image: frame.image, position: Offset(100, 100)));
+      images.add(PositionedImage(
+        image: image,
+        position: const Offset(100, 100),
+        scale: 1.0,
+      ));
     });
   }
 
@@ -85,22 +105,23 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
         ],
       ),
       body: GestureDetector(
-        onPanStart: (details) {
+        onScaleStart: (details) {
           final box = context.findRenderObject() as RenderBox;
-          final localPosition = box.globalToLocal(details.globalPosition);
+          final localPosition = box.globalToLocal(details.focalPoint);
 
           for (int i = images.length - 1; i >= 0; i--) {
             final img = images[i];
             final imgRect = Rect.fromLTWH(
               img.position.dx,
               img.position.dy,
-              img.image.width.toDouble(),
-              img.image.height.toDouble(),
+              img.image.width * img.scale,
+              img.image.height * img.scale,
             );
 
             if (imgRect.contains(localPosition)) {
               selectedImageIndex = i;
               selectedImageOffset = localPosition - img.position;
+              initialScale = img.scale;
               return;
             }
           }
@@ -113,40 +134,39 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
             startPoint = localPosition;
           }
         },
-        onPanUpdate: (details) {
+        onScaleUpdate: (details) {
           final box = context.findRenderObject() as RenderBox;
-          final localPosition = box.globalToLocal(details.globalPosition);
+          final localPosition = box.globalToLocal(details.focalPoint);
 
-          if (selectedImageIndex != null) {
+          if (selectedImageIndex != null && selectedImageOffset != null) {
             setState(() {
-              images[selectedImageIndex!] = PositionedImage(
-                image: images[selectedImageIndex!].image,
+              images[selectedImageIndex!] = images[selectedImageIndex!].copyWith(
                 position: localPosition - selectedImageOffset!,
+                scale: initialScale * details.scale,
               );
             });
           } else if (currentMode == DrawMode.free) {
             setState(() {
               lines.last.points.add(localPosition);
             });
-          } else {
+          } else if (startPoint != null) {
             setState(() {
-              if (startPoint != null) {
-                if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
-                  shapes.removeLast();
-                }
-                shapes.add(DrawnShape(
-                  start: startPoint!,
-                  end: localPosition,
-                  color: selectedColor,
-                  mode: currentMode,
-                ));
+              if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
+                shapes.removeLast();
               }
+              shapes.add(DrawnShape(
+                start: startPoint!,
+                end: localPosition,
+                color: selectedColor,
+                mode: currentMode,
+              ));
             });
           }
         },
-        onPanEnd: (_) {
+        onScaleEnd: (_) {
           selectedImageIndex = null;
           selectedImageOffset = null;
+          initialScale = 1.0;
         },
         child: CustomPaint(
           painter: SketchPainter(shapes: shapes, lines: lines, images: images),
@@ -189,7 +209,9 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
       child: CircleAvatar(
         backgroundColor: color,
         radius: 12,
-        child: selectedColor == color ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+        child: selectedColor == color
+            ? const Icon(Icons.check, size: 16, color: Colors.white)
+            : null,
       ),
     );
   }
@@ -252,10 +274,22 @@ class SketchPainter extends CustomPainter {
     }
 
     for (var img in images) {
-      canvas.drawImage(img.image, img.position, Paint());
+      final dst = Rect.fromLTWH(
+        img.position.dx,
+        img.position.dy,
+        img.image.width * img.scale,
+        img.image.height * img.scale,
+      );
+      final src = Rect.fromLTWH(
+        0,
+        0,
+        img.image.width.toDouble(),
+        img.image.height.toDouble(),
+      );
+      canvas.drawImageRect(img.image, src, dst, Paint());
     }
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
