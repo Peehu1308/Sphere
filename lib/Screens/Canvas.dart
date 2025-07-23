@@ -57,28 +57,6 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
   Color selectedColor = Colors.black;
   Offset? startPoint;
 
-  @override
-  void initState() {
-    super.initState();
-    // Optional: preload a default image
-    loadImage('assets/album.jpg');
-  }
-
-  Future<void> loadImage(String assetPath) async {
-    final data = await rootBundle.load(assetPath);
-    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-    final frame = await codec.getNextFrame();
-    final image = frame.image;
-
-    setState(() {
-      images.add(PositionedImage(
-        image: image,
-        position: const Offset(100, 100),
-        scale: 1.0,
-      ));
-    });
-  }
-
   Future<void> pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
@@ -90,11 +68,13 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
     final image = frame.image;
 
     setState(() {
-      images.add(PositionedImage(
-        image: image,
-        position: const Offset(50, 50),
-        scale: 1.0,
-      ));
+      images.add(
+        PositionedImage(
+          image: image,
+          position: const Offset(50, 50),
+          scale: 1.0,
+        ),
+      );
     });
   }
 
@@ -129,76 +109,93 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
           IconButton(icon: const Icon(Icons.clear), onPressed: clearCanvas),
         ],
       ),
-      body: GestureDetector(
-        onScaleStart: (details) {
-          final box = context.findRenderObject() as RenderBox;
-          final localPos = box.globalToLocal(details.focalPoint);
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return GestureDetector(
+            onScaleStart: (details) {
+              final box = context.findRenderObject() as RenderBox;
+              final localPosition = box.globalToLocal(details.focalPoint);
 
-          if (currentMode == DrawMode.select) {
-            for (int i = images.length - 1; i >= 0; i--) {
-              final img = images[i];
-              final rect = Rect.fromLTWH(
-                img.position.dx,
-                img.position.dy,
-                img.image.width * img.scale,
-                img.image.height * img.scale,
-              );
-              if (rect.contains(localPos)) {
-                selectedImageIndex = i;
-                selectedImageOffset = localPos - img.position;
-                initialScale = img.scale;
-                return;
+              if (currentMode == DrawMode.select) {
+                for (int i = images.length - 1; i >= 0; i--) {
+                  final img = images[i];
+                  final rect = Rect.fromLTWH(
+                    img.position.dx,
+                    img.position.dy,
+                    img.image.width * img.scale,
+                    img.image.height * img.scale,
+                  );
+                  if (rect.contains(localPosition)) {
+                    selectedImageIndex = i;
+                    selectedImageOffset = localPosition - img.position;
+                    initialScale = img.scale;
+                    break;
+                  }
+                }
+              } else if (currentMode == DrawMode.free) {
+                setState(() {
+                  lines.add(
+                    DrawnLine(points: [localPosition], color: selectedColor),
+                  );
+                });
+              } else {
+                startPoint = localPosition;
               }
-            }
-          } else if (currentMode == DrawMode.free) {
-            setState(() => lines.add(DrawnLine(points: [localPos], color: selectedColor)));
-          } else {
-            startPoint = localPos;
-          }
-        },
-        onScaleUpdate: (details) {
-          final box = context.findRenderObject() as RenderBox;
-          final localPos = box.globalToLocal(details.focalPoint);
+            },
+            onScaleUpdate: (details) {
+              final box = context.findRenderObject() as RenderBox;
+              final localPosition = box.globalToLocal(details.focalPoint);
 
-          if (currentMode == DrawMode.select && selectedImageIndex != null) {
-            setState(() {
-              images[selectedImageIndex!] = images[selectedImageIndex!].copyWith(
-                position: localPos - (selectedImageOffset ?? Offset.zero),
-                scale: initialScale * details.scale,
-              );
-            });
-          } else if (currentMode == DrawMode.free) {
-            setState(() {
-              lines.last.points.add(localPos);
-            });
-          } else if (startPoint != null) {
-            setState(() {
-              if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
-                shapes.removeLast();
+              if (currentMode == DrawMode.select &&
+                  selectedImageIndex != null &&
+                  selectedImageOffset != null) {
+                setState(() {
+                  images[selectedImageIndex!] = images[selectedImageIndex!]
+                      .copyWith(
+                        position: localPosition - selectedImageOffset!,
+                        scale: initialScale * details.scale,
+                      );
+                });
+              } else if (currentMode == DrawMode.free) {
+                setState(() {
+                  lines.last.points.add(localPosition);
+                });
+              } else if (startPoint != null) {
+                setState(() {
+                  if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
+                    shapes.removeLast();
+                  }
+                  shapes.add(
+                    DrawnShape(
+                      start: startPoint!,
+                      end: localPosition,
+                      color: selectedColor,
+                      mode: currentMode,
+                    ),
+                  );
+                });
               }
-              shapes.add(DrawnShape(
-                start: startPoint!,
-                end: localPos,
-                color: selectedColor,
-                mode: currentMode,
-              ));
-            });
-          }
+            },
+            onScaleEnd: (_) {
+              selectedImageIndex = null;
+              selectedImageOffset = null;
+              initialScale = 1.0;
+              startPoint = null;
+            },
+            child: CustomPaint(
+              painter: SketchPainter(
+                shapes: shapes,
+                lines: lines,
+                images: images,
+              ),
+              child: Container(),
+            ),
+          );
         },
-        onScaleEnd: (_) {
-          selectedImageIndex = null;
-          selectedImageOffset = null;
-          initialScale = 1.0;
-          startPoint = null;
-        },
-        child: CustomPaint(
-          painter: SketchPainter(shapes: shapes, lines: lines, images: images),
-          child: Container(),
-        ),
       ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -230,7 +227,9 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
       child: CircleAvatar(
         backgroundColor: color,
         radius: 12,
-        child: selectedColor == color ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+        child: selectedColor == color
+            ? const Icon(Icons.check, size: 16, color: Colors.white)
+            : null,
       ),
     );
   }
@@ -241,7 +240,12 @@ class DrawnShape {
   final Color color;
   final DrawMode mode;
 
-  DrawnShape({required this.start, required this.end, required this.color, required this.mode});
+  DrawnShape({
+    required this.start,
+    required this.end,
+    required this.color,
+    required this.mode,
+  });
 }
 
 class DrawnLine {
@@ -256,7 +260,11 @@ class SketchPainter extends CustomPainter {
   final List<DrawnLine> lines;
   final List<PositionedImage> images;
 
-  SketchPainter({required this.shapes, required this.lines, required this.images});
+  SketchPainter({
+    required this.shapes,
+    required this.lines,
+    required this.images,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -290,7 +298,12 @@ class SketchPainter extends CustomPainter {
         img.image.width * img.scale,
         img.image.height * img.scale,
       );
-      final src = Rect.fromLTWH(0, 0, img.image.width.toDouble(), img.image.height.toDouble());
+      final src = Rect.fromLTWH(
+        0,
+        0,
+        img.image.width.toDouble(),
+        img.image.height.toDouble(),
+      );
       canvas.drawImageRect(img.image, src, dst, Paint());
     }
   }
