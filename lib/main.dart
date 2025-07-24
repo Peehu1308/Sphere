@@ -34,9 +34,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Color(0xFFF6F4F3)),
       // home: const MoodScreen(token:widget.token),
       // home: const BlogScreen(),
-      // home: const MainScreen(),
+      home: const MainScreen(token: '',),
       // home: SplashScreen(token: '',),
-      home:MyDrawingApp()
+      // home:MyDrawingApp()
     );
   }
 }
