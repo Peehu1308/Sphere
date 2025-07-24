@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sphere/Screens/BlogScreen.dart';
 import 'package:sphere/Screens/Canvas.dart';
+import 'package:sphere/Screens/Login.dart';
 import 'package:sphere/Screens/MoodScreen.dart';
 import 'package:sphere/Screens/MusicScreen.dart';
 import 'package:sphere/Screens/SplashScreen.dart';
@@ -34,9 +35,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: Color(0xFFF6F4F3)),
       // home: const MoodScreen(token:widget.token),
       // home: const BlogScreen(),
-      home: const MainScreen(token: '',),
+      // home: const MainScreen(token: '',),
       // home: SplashScreen(token: '',),
       // home:MyDrawingApp()
+      home: LoginScreen(),
     );
   }
 }
