@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sphere/Screens/Login.dart';
 import 'package:sphere/Screens/MoodScreen.dart';
 import 'package:sphere/components/spotify.dart';
 import 'package:sphere/main.dart';
@@ -20,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MoodScreen(token: widget.token),
+          builder: (context) => LoginScreen(),
         ),
       );
     });
