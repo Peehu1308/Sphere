@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sphere/Screens/BlogScreen.dart';
+import 'package:sphere/Screens/Canvas.dart';
 import 'package:sphere/Screens/MoodScreen.dart';
 import 'package:sphere/Screens/MusicScreen.dart';
 
@@ -8,7 +9,12 @@ class Navbar extends StatefulWidget {
   final Function(int) onTap;
   final String token;
 
-  const Navbar({super.key, required this.currentIndex, required this.onTap,required this.token});
+  const Navbar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+    required this.token,
+  });
 
   @override
   State<Navbar> createState() => _NavbarState();
@@ -23,19 +29,28 @@ class _NavbarState extends State<Navbar> {
         if (index == 0) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MusicScreen(token:widget.token,)),
+            MaterialPageRoute(
+              builder: (context) => MusicScreen(token: widget.token),
+            ),
           );
         } else if (index == 1) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MoodScreen(token:widget.token),
+              builder: (context) => MoodScreen(token: widget.token),
             ),
           );
         } else if (index == 2) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => BlogScreen(token: widget.token,)),
+            MaterialPageRoute(
+              builder: (context) => BlogScreen(token: widget.token),
+            ),
+          );
+        } else if (index == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MyDrawingApp()),
           );
         }
       },
@@ -55,6 +70,10 @@ class _NavbarState extends State<Navbar> {
           icon: Icon(Icons.article_outlined),
           label: 'Blog',
         ),
+        // BottomNavigationBarItem(
+        //   icon: Icon(Icons.draw_outlined),
+        //   label: "Canvas",
+        // ),
       ],
     );
   }
