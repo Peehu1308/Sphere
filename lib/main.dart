@@ -20,12 +20,12 @@ Future<void> main() async {
   final clientSecret = dotenv.env['SPOTIFY_CLIENT_SECRET']!;
   final redirectUri = dotenv.env['SPOTIFY_REDIRECT_URI']!;
 
-  runApp(const MyApp(token: '',));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final String token;
-  const MyApp({super.key,required this.token});
+  
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -36,9 +36,9 @@ class MyApp extends StatelessWidget {
       // home: const MoodScreen(token:widget.token),
       // home: const BlogScreen(),
       // home: const MainScreen(token: '',),
-      // home: SplashScreen(token: '',),
+      home: SplashScreen(),
       // home:MyDrawingApp()
-      home: LoginScreen(),
+      // home: LoginScreen(),
     );
   }
 }
