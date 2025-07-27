@@ -6,8 +6,8 @@ import 'package:sphere/components/spotify.dart';
 import 'package:sphere/main.dart';
 
 class SplashScreen extends StatefulWidget {
-  final String token;
-  const SplashScreen({super.key, required this.token});
+  
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
