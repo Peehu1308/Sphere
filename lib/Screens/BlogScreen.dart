@@ -14,15 +14,15 @@ class _BlogScreenState extends State<BlogScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Blog Screen')),
+      // appBar: AppBar(title: const Text('Blog Screen')),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
-              Text(
-                'Welcome to the Blog Screen',
-                style: TextStyle(fontSize: 24),
-              ),
+              // Text(
+              //   'Welcome to the Blog Screen',
+              //   style: TextStyle(fontSize: 24),
+              // ),
               SafeArea(child: BlogGrid()),
             ],
           ),
