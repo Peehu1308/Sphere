@@ -22,6 +22,7 @@ class MoodBoardBox extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
+        
         child: Image.network(
           moodimage,
           fit: BoxFit.cover,
@@ -87,7 +88,7 @@ class _MoodGridState extends State<MoodGrid> {
             mainAxisSpacing: 4,
             crossAxisSpacing: 4,
             itemCount: moodImages.length,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(5),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
