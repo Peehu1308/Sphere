@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:ui' as ui;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:sphere/components/navbar.dart';
 
@@ -45,6 +49,7 @@ class DrawingHomePage extends StatefulWidget {
 }
 
 class _DrawingHomePageState extends State<DrawingHomePage> {
+  final GlobalKey _canvasKey = GlobalKey(); // ✅ Added key for capturing
   final ImagePicker _picker = ImagePicker();
 
   List<PositionedImage> images = [];
@@ -58,6 +63,44 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
   Color selectedColor = Colors.black;
   Offset? startPoint;
 
+  Future<void> _captureAndSaveCanvas() async {
+    try {
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Storage permission denied")));
+        return;
+      }
+
+      final boundary = _canvasKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      final result = await ImageGallerySaver.saveImage(
+        pngBytes,
+        quality: 100,
+        name: "sketch_${DateTime.now().millisecondsSinceEpoch}",
+      );
+
+      final isSuccess = result['isSuccess'] ?? result['success'];
+
+      if (isSuccess == true) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Saved to gallery")));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Failed to save")));
+      }
+    } catch (e) {
+      print('Error saving canvas to gallery: $e');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
   Future<void> pickImage() async {
     final picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
@@ -69,13 +112,7 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
     final image = frame.image;
 
     setState(() {
-      images.add(
-        PositionedImage(
-          image: image,
-          position: const Offset(50, 50),
-          scale: 1.0,
-        ),
-      );
+      images.add(PositionedImage(image: image, position: const Offset(50, 50)));
     });
   }
 
@@ -102,15 +139,24 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: const Color.fromARGB(255, 249, 237, 209),
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Sketch Board'),
+        title: Text(
+          "Sphere",
+          style: GoogleFonts.pacifico(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.image), onPressed: pickImage),
           IconButton(icon: const Icon(Icons.undo), onPressed: undo),
-          IconButton(icon: const Icon(Icons.cleaning_services_rounded), onPressed: clearCanvas),
+          IconButton(
+              icon: const Icon(Icons.cleaning_services_rounded),
+              onPressed: clearCanvas),
+          IconButton(icon: const Icon(Icons.download), onPressed: _captureAndSaveCanvas),
         ],
       ),
       body: Stack(
@@ -120,7 +166,8 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
               return GestureDetector(
                 onScaleStart: (details) {
                   final box = context.findRenderObject() as RenderBox;
-                  final localPosition = box.globalToLocal(details.focalPoint);
+                  final localPosition =
+                      box.globalToLocal(details.focalPoint);
 
                   if (currentMode == DrawMode.select) {
                     for (int i = images.length - 1; i >= 0; i--) {
@@ -133,16 +180,16 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
                       );
                       if (rect.contains(localPosition)) {
                         selectedImageIndex = i;
-                        selectedImageOffset = localPosition - img.position;
+                        selectedImageOffset =
+                            localPosition - img.position;
                         initialScale = img.scale;
                         break;
                       }
                     }
                   } else if (currentMode == DrawMode.free) {
                     setState(() {
-                      lines.add(
-                        DrawnLine(points: [localPosition], color: selectedColor),
-                      );
+                      lines.add(DrawnLine(
+                          points: [localPosition], color: selectedColor));
                     });
                   } else {
                     startPoint = localPosition;
@@ -150,17 +197,18 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
                 },
                 onScaleUpdate: (details) {
                   final box = context.findRenderObject() as RenderBox;
-                  final localPosition = box.globalToLocal(details.focalPoint);
+                  final localPosition =
+                      box.globalToLocal(details.focalPoint);
 
                   if (currentMode == DrawMode.select &&
                       selectedImageIndex != null &&
                       selectedImageOffset != null) {
                     setState(() {
-                      images[selectedImageIndex!] = images[selectedImageIndex!]
-                          .copyWith(
-                            position: localPosition - selectedImageOffset!,
-                            scale: initialScale * details.scale,
-                          );
+                      images[selectedImageIndex!] =
+                          images[selectedImageIndex!].copyWith(
+                        position: localPosition - selectedImageOffset!,
+                        scale: initialScale * details.scale,
+                      );
                     });
                   } else if (currentMode == DrawMode.free) {
                     setState(() {
@@ -168,17 +216,16 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
                     });
                   } else if (startPoint != null) {
                     setState(() {
-                      if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
+                      if (shapes.isNotEmpty &&
+                          shapes.last.mode == currentMode) {
                         shapes.removeLast();
                       }
-                      shapes.add(
-                        DrawnShape(
-                          start: startPoint!,
-                          end: localPosition,
-                          color: selectedColor,
-                          mode: currentMode,
-                        ),
-                      );
+                      shapes.add(DrawnShape(
+                        start: startPoint!,
+                        end: localPosition,
+                        color: selectedColor,
+                        mode: currentMode,
+                      ));
                     });
                   }
                 },
@@ -188,13 +235,16 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
                   initialScale = 1.0;
                   startPoint = null;
                 },
-                child: CustomPaint(
-                  painter: SketchPainter(
-                    shapes: shapes,
-                    lines: lines,
-                    images: images,
+                child: RepaintBoundary(
+                  key: _canvasKey, // ✅ Added wrapper
+                  child: CustomPaint(
+                    painter: SketchPainter(
+                      shapes: shapes,
+                      lines: lines,
+                      images: images,
+                    ),
+                    child: Container(),
                   ),
-                  child: Container(),
                 ),
               );
             },
@@ -202,8 +252,6 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
           Positioned(
             bottom: 150,
             left: 16,
-            // right: 16,
-            
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -222,17 +270,17 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
+                    _buildModeButton(Icons.pinch_outlined, DrawMode.select),
                     _buildModeButton(Icons.crop_square, DrawMode.rectangle),
                     _buildModeButton(Icons.circle, DrawMode.circle),
                     _buildModeButton(Icons.brush, DrawMode.free),
-                    _buildModeButton(Icons.arrow_forward, DrawMode.select),
                     const SizedBox(width: 12),
                     _buildColorPicker(Colors.red),
-                    SizedBox(height: 5,),
+                    const SizedBox(height: 5),
                     _buildColorPicker(Colors.green),
-                    SizedBox(height: 5,),
+                    const SizedBox(height: 5),
                     _buildColorPicker(Colors.blue),
-                    SizedBox(height: 5,),
+                    const SizedBox(height: 5),
                     _buildColorPicker(Colors.black),
                   ],
                 ),
@@ -241,13 +289,15 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: Navbar(currentIndex: 3, onTap: (index){}, token: "12"),
+      bottomNavigationBar:
+          Navbar(currentIndex: 3, onTap: (index) {}, token: "12"),
     );
   }
 
   Widget _buildModeButton(IconData icon, DrawMode mode) {
     return IconButton(
-      icon: Icon(icon, color: currentMode == mode ? Colors.amber : Colors.black),
+      icon: Icon(icon,
+          color: currentMode == mode ? Colors.amber : Colors.black),
       onPressed: () => setState(() => currentMode = mode),
     );
   }
