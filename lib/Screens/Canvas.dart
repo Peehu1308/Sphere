@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import 'package:sphere/components/navbar.dart';
 
 void main() => runApp(MyDrawingApp());
 
@@ -101,124 +102,152 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // backgroundColor: const Color.fromARGB(255, 249, 237, 209),
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Sketch Board'),
         actions: [
           IconButton(icon: const Icon(Icons.image), onPressed: pickImage),
           IconButton(icon: const Icon(Icons.undo), onPressed: undo),
-          IconButton(icon: const Icon(Icons.clear), onPressed: clearCanvas),
+          IconButton(icon: const Icon(Icons.cleaning_services_rounded), onPressed: clearCanvas),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return GestureDetector(
-            onScaleStart: (details) {
-              final box = context.findRenderObject() as RenderBox;
-              final localPosition = box.globalToLocal(details.focalPoint);
+      body: Stack(
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                onScaleStart: (details) {
+                  final box = context.findRenderObject() as RenderBox;
+                  final localPosition = box.globalToLocal(details.focalPoint);
 
-              if (currentMode == DrawMode.select) {
-                for (int i = images.length - 1; i >= 0; i--) {
-                  final img = images[i];
-                  final rect = Rect.fromLTWH(
-                    img.position.dx,
-                    img.position.dy,
-                    img.image.width * img.scale,
-                    img.image.height * img.scale,
-                  );
-                  if (rect.contains(localPosition)) {
-                    selectedImageIndex = i;
-                    selectedImageOffset = localPosition - img.position;
-                    initialScale = img.scale;
-                    break;
-                  }
-                }
-              } else if (currentMode == DrawMode.free) {
-                setState(() {
-                  lines.add(
-                    DrawnLine(points: [localPosition], color: selectedColor),
-                  );
-                });
-              } else {
-                startPoint = localPosition;
-              }
-            },
-            onScaleUpdate: (details) {
-              final box = context.findRenderObject() as RenderBox;
-              final localPosition = box.globalToLocal(details.focalPoint);
-
-              if (currentMode == DrawMode.select &&
-                  selectedImageIndex != null &&
-                  selectedImageOffset != null) {
-                setState(() {
-                  images[selectedImageIndex!] = images[selectedImageIndex!]
-                      .copyWith(
-                        position: localPosition - selectedImageOffset!,
-                        scale: initialScale * details.scale,
+                  if (currentMode == DrawMode.select) {
+                    for (int i = images.length - 1; i >= 0; i--) {
+                      final img = images[i];
+                      final rect = Rect.fromLTWH(
+                        img.position.dx,
+                        img.position.dy,
+                        img.image.width * img.scale,
+                        img.image.height * img.scale,
                       );
-                });
-              } else if (currentMode == DrawMode.free) {
-                setState(() {
-                  lines.last.points.add(localPosition);
-                });
-              } else if (startPoint != null) {
-                setState(() {
-                  if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
-                    shapes.removeLast();
+                      if (rect.contains(localPosition)) {
+                        selectedImageIndex = i;
+                        selectedImageOffset = localPosition - img.position;
+                        initialScale = img.scale;
+                        break;
+                      }
+                    }
+                  } else if (currentMode == DrawMode.free) {
+                    setState(() {
+                      lines.add(
+                        DrawnLine(points: [localPosition], color: selectedColor),
+                      );
+                    });
+                  } else {
+                    startPoint = localPosition;
                   }
-                  shapes.add(
-                    DrawnShape(
-                      start: startPoint!,
-                      end: localPosition,
-                      color: selectedColor,
-                      mode: currentMode,
-                    ),
-                  );
-                });
-              }
+                },
+                onScaleUpdate: (details) {
+                  final box = context.findRenderObject() as RenderBox;
+                  final localPosition = box.globalToLocal(details.focalPoint);
+
+                  if (currentMode == DrawMode.select &&
+                      selectedImageIndex != null &&
+                      selectedImageOffset != null) {
+                    setState(() {
+                      images[selectedImageIndex!] = images[selectedImageIndex!]
+                          .copyWith(
+                            position: localPosition - selectedImageOffset!,
+                            scale: initialScale * details.scale,
+                          );
+                    });
+                  } else if (currentMode == DrawMode.free) {
+                    setState(() {
+                      lines.last.points.add(localPosition);
+                    });
+                  } else if (startPoint != null) {
+                    setState(() {
+                      if (shapes.isNotEmpty && shapes.last.mode == currentMode) {
+                        shapes.removeLast();
+                      }
+                      shapes.add(
+                        DrawnShape(
+                          start: startPoint!,
+                          end: localPosition,
+                          color: selectedColor,
+                          mode: currentMode,
+                        ),
+                      );
+                    });
+                  }
+                },
+                onScaleEnd: (_) {
+                  selectedImageIndex = null;
+                  selectedImageOffset = null;
+                  initialScale = 1.0;
+                  startPoint = null;
+                },
+                child: CustomPaint(
+                  painter: SketchPainter(
+                    shapes: shapes,
+                    lines: lines,
+                    images: images,
+                  ),
+                  child: Container(),
+                ),
+              );
             },
-            onScaleEnd: (_) {
-              selectedImageIndex = null;
-              selectedImageOffset = null;
-              initialScale = 1.0;
-              startPoint = null;
-            },
-            child: CustomPaint(
-              painter: SketchPainter(
-                shapes: shapes,
-                lines: lines,
-                images: images,
-              ),
-              child: Container(),
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildModeButton(Icons.crop_square, DrawMode.rectangle),
-              _buildModeButton(Icons.circle, DrawMode.circle),
-              _buildModeButton(Icons.brush, DrawMode.free),
-              _buildModeButton(Icons.arrow_forward, DrawMode.select),
-              _buildColorPicker(Colors.red),
-              _buildColorPicker(Colors.green),
-              _buildColorPicker(Colors.blue),
-              _buildColorPicker(Colors.black),
-            ],
           ),
-        ),
+          Positioned(
+            bottom: 150,
+            left: 16,
+            // right: 16,
+            
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildModeButton(Icons.crop_square, DrawMode.rectangle),
+                    _buildModeButton(Icons.circle, DrawMode.circle),
+                    _buildModeButton(Icons.brush, DrawMode.free),
+                    _buildModeButton(Icons.arrow_forward, DrawMode.select),
+                    const SizedBox(width: 12),
+                    _buildColorPicker(Colors.red),
+                    SizedBox(height: 5,),
+                    _buildColorPicker(Colors.green),
+                    SizedBox(height: 5,),
+                    _buildColorPicker(Colors.blue),
+                    SizedBox(height: 5,),
+                    _buildColorPicker(Colors.black),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      
-      
+      bottomNavigationBar: Navbar(currentIndex: 3, onTap: (index){}, token: "12"),
     );
   }
 
   Widget _buildModeButton(IconData icon, DrawMode mode) {
     return IconButton(
-      icon: Icon(icon, color: currentMode == mode ? Colors.amber : Colors.grey),
+      icon: Icon(icon, color: currentMode == mode ? Colors.amber : Colors.black),
       onPressed: () => setState(() => currentMode = mode),
     );
   }
@@ -226,12 +255,15 @@ class _DrawingHomePageState extends State<DrawingHomePage> {
   Widget _buildColorPicker(Color color) {
     return GestureDetector(
       onTap: () => setState(() => selectedColor = color),
-      child: CircleAvatar(
-        backgroundColor: color,
-        radius: 12,
-        child: selectedColor == color
-            ? const Icon(Icons.check, size: 16, color: Colors.white)
-            : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: CircleAvatar(
+          backgroundColor: color,
+          radius: 12,
+          child: selectedColor == color
+              ? const Icon(Icons.check, size: 16, color: Colors.white)
+              : null,
+        ),
       ),
     );
   }
