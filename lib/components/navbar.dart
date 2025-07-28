@@ -24,7 +24,12 @@ class _NavbarState extends State<Navbar> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      
       currentIndex: widget.currentIndex,
+      unselectedIconTheme:IconThemeData(color:Colors.grey) ,
+      selectedIconTheme: IconThemeData(color: Colors.white),
+      selectedLabelStyle: TextStyle(color: Colors.white),
+      unselectedLabelStyle: TextStyle(color: Colors.grey),
       onTap: (index) {
         if (index == 0) {
           Navigator.push(
@@ -54,9 +59,9 @@ class _NavbarState extends State<Navbar> {
           );
         }
       },
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
 
-      selectedItemColor: Colors.black,
+      selectedItemColor: Colors.white,
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
