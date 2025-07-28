@@ -16,17 +16,22 @@ class _MoodScreenState extends State<MoodScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('MoodScreen Screen')),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              Text(
-                'Welcome to the MoodScreen Screen',
-                style: TextStyle(fontSize: 24),
-              ),
-              SafeArea(child: MoodGrid()),
-            ],
+      backgroundColor: Colors.white,
+      
+      
+      body: Padding(
+        padding: const EdgeInsets.only(top:10.0),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                // Text(
+                //   'Welcome to the MoodScreen Screen',
+                //   style: TextStyle(fontSize: 24),
+                // ),
+                SafeArea(child: MoodGrid()),
+              ],
+            ),
           ),
         ),
       ),
