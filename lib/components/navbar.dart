@@ -70,10 +70,10 @@ class _NavbarState extends State<Navbar> {
           icon: Icon(Icons.article_outlined),
           label: 'Blog',
         ),
-        // BottomNavigationBarItem(
-        //   icon: Icon(Icons.draw_outlined),
-        //   label: "Canvas",
-        // ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.draw_outlined),
+          label: "Canvas",
+        ),
       ],
     );
   }
