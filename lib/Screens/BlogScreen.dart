@@ -5,7 +5,7 @@ import 'package:sphere/components/navbar.dart';
 
 class BlogScreen extends StatefulWidget {
   final String token;
-  const BlogScreen({super.key,required this.token});
+  const BlogScreen({super.key, required this.token});
 
   @override
   State<BlogScreen> createState() => _BlogScreenState();
@@ -15,30 +15,46 @@ class _BlogScreenState extends State<BlogScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Positioned(
+          right:2,
+          child: Icon(Icons.create)),
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.black,
+      ),
+      backgroundColor: Colors.black,
       // appBar: AppBar(title: const Text('Blog Screen')),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 40.0),
+                padding: const EdgeInsets.only(top: 20.0, left: 15, right: 5),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Row(children: [
-                    
-                    ElevatedButton(onPressed: (){}, child:Text("Political")),
-                    ElevatedButton(onPressed: (){}, child:Text("Political")),
-                    ElevatedButton(onPressed: (){}, child:Text("Political")),
-                    ElevatedButton(onPressed: (){}, child:Text("Political")),
-                    ElevatedButton(onPressed: (){}, child:Text("Political")),
-                    ElevatedButton(onPressed: (){}, child:Text("Political")),
-                  ],),
+                  child: Wrap(
+                    spacing: 12, // horizontal gap
+                    children: List.generate(
+                      6,
+                      (_) => ElevatedButton(
+                        onPressed: () {},
+                        child: Text(
+                          "Political",
+                          style: TextStyle(
+                            color:
+                                // Color(0xFF183059)
+                                Color(0xFF235A9C),
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              // Text(
-              //   'Welcome to the Blog Screen',
-              //   style: TextStyle(fontSize: 24),
-              // ),
+              
               SafeArea(child: BlogGrid()),
             ],
           ),
