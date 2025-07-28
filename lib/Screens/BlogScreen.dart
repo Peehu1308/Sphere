@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sphere/components/blog_box.dart';
 import 'package:sphere/components/navbar.dart';
@@ -19,6 +20,21 @@ class _BlogScreenState extends State<BlogScreen> {
         child: Center(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(children: [
+                    
+                    ElevatedButton(onPressed: (){}, child:Text("Political")),
+                    ElevatedButton(onPressed: (){}, child:Text("Political")),
+                    ElevatedButton(onPressed: (){}, child:Text("Political")),
+                    ElevatedButton(onPressed: (){}, child:Text("Political")),
+                    ElevatedButton(onPressed: (){}, child:Text("Political")),
+                    ElevatedButton(onPressed: (){}, child:Text("Political")),
+                  ],),
+                ),
+              ),
               // Text(
               //   'Welcome to the Blog Screen',
               //   style: TextStyle(fontSize: 24),
