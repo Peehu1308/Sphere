@@ -59,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    screens = [MusicScreen(token:widget.token), MoodScreen(token:widget.token), BlogScreen(token:widget.token)];
+    screens = [MusicScreen(token:widget.token), MoodScreen(token:widget.token), BlogScreen(token:widget.token),MyDrawingApp()];
   }
 
   @override
