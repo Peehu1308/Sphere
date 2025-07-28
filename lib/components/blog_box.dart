@@ -52,7 +52,7 @@ class BlogBox extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.only(left:15.0,right:15),
+        padding: const EdgeInsets.only(left:15.0,right:15,top: 5),
         child: Container(
           // height: 400,
           margin: const EdgeInsets.only(left: 4.0,right:4),
@@ -78,7 +78,7 @@ class BlogBox extends StatelessWidget {
                           const Icon(Icons.broken_image),
                     ),
                   ),
-                  Text(text, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(text, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,),
                 ],
               ),
             ),
@@ -152,7 +152,7 @@ class _BlogGridState extends State<BlogGrid> {
 
     return MasonryGridView.count(
       crossAxisCount: 1,
-      mainAxisSpacing: 2,
+      mainAxisSpacing: 7,
       crossAxisSpacing: 4,
       itemCount: blogs.length,
       padding: const EdgeInsets.only(left:8,right:8),
