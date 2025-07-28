@@ -55,7 +55,7 @@ class BlogBox extends StatelessWidget {
         padding: const EdgeInsets.only(left:15.0,right:15),
         child: Container(
           // height: 400,
-          margin: const EdgeInsets.all(4.0),
+          margin: const EdgeInsets.only(left: 4.0,right:4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: color,
@@ -155,7 +155,7 @@ class _BlogGridState extends State<BlogGrid> {
       mainAxisSpacing: 2,
       crossAxisSpacing: 4,
       itemCount: blogs.length,
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.only(left:8,right:8),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
