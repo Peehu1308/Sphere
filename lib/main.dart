@@ -34,9 +34,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(scaffoldBackgroundColor: Color(0xFFF6F4F3)),
       // home: const MoodScreen(token:widget.token),
-      // home: const BlogScreen(),
+      home: const BlogScreen(token: '',),
       // home: const MainScreen(token: '',),
-      home: SplashScreen(),
+      // home: SplashScreen(),
       // home:MyDrawingApp()
       // home: LoginScreen(),
     );
