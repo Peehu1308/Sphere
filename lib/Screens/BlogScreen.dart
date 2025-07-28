@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sphere/components/blog_box.dart';
 import 'package:sphere/components/navbar.dart';
 
@@ -16,9 +17,19 @@ class _BlogScreenState extends State<BlogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Positioned(
-          right:2,
-          child: Icon(Icons.create)),
+
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children:[
+            Text("Sphere",
+            style: GoogleFonts.pacifico(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),),
+            Icon(Icons.create)
+          ] ),
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.black,
       ),
